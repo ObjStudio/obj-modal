@@ -1,117 +1,125 @@
 <template>
   <div>
     <el-form
-      :inline="true"
-      :key="modalConfig.key ? modalConfig.key : ''"
-      ref="formRef"
-      :model="modalData"
-      :disabled="modalConfig.formEditDisabled"
-      :label-width="labelWidth"
+      :ref="formRef"
+      :model="formData"
+      v-bind="formConfig"
+      label-width="100px"
     >
       <el-form-item
-        v-for="item in modalForm"
-        :class="itemClass"
-        :label="item.label"
+        v-for="item in formCols"
         :key="item.prop"
-        :prop="item.prop"
         :rules="filter_rules(item.label, item.rules)"
-        :label-width="item.labelWidth"
+        :label="buttonType.indexOf(item.type) != -1 ? null : item.label"
+        v-bind="item"
       >
+        <!-- jsx 返回jsx数据-->
+        <render
+          v-if="item.type === 'jsx'"
+          :render="item.render && item.render()"
+        ></render>
+        <!-- 自定义label 返回jsx数据-->
+        <render
+          name="label"
+          v-if="item.renderLabel"
+          :render="item.renderLabel()"
+        ></render>
         <!-- 输入框 -->
         <el-input
           v-if="item.type === 'Input'"
           :style="'width:' + item.width"
-          v-model="modalData[item.prop]"
+          v-model="formData[item.prop]"
           :placeholder="
             item.placeholder != undefined
               ? item.placeholder
               : '请输入' + item.label
           "
-          size="item.size"
-          :clearable="item.clearable"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @clear="item.clear && item.clear(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          @input="item.input && item.input(modalData[item.prop])"
-          @focus="item.focus && item.focus(modalData[item.prop])"
+          v-bind="item"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
+          v-on="item.event"
+        ></el-input>
+        <!-- textarea -->
+        <el-input
+          v-if="item.type === 'Textarea'"
+          type="textarea"
+          :style="{ width: item.width }"
+          v-model="formData[item.prop]"
+          :placeholder="'请输入' + item.label"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         ></el-input>
         <!-- 下拉框 -->
         <el-select
+          v-if="item.type === 'Select'"
+          v-model="formData[item.prop]"
           :ref="item.ref"
           :style="'width:' + item.width"
-          v-if="item.type === 'Select'"
-          :multiple="item.multiple"
-          :filterable="item.remote"
-          :remote="item.remote"
-          :remote-method="item.remoteMethod"
-          v-model="modalData[item.prop]"
-          size="item.size"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          @focus="item.focus && item.focus(modalData[item.prop], item.params)"
+          v-bind="item"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
+          v-on="item.event"
         >
           <el-option
-            v-if="!item.multiple"
+            v-if="item.default"
             :label="'请选择' + item.label"
             value=""
           ></el-option>
           <el-option
             v-for="op in item.options"
-            :label="item.props ? op[item.props.label] : op.label"
-            :value="item.props ? op[item.props.value] : op.value"
-            :key="item.props ? op[item.props.value] : op.value"
+            :label="op.label"
+            :value="op.value"
+            :key="op.value"
+            :disabled="op.disabled && op.disabled(formData[item.prop])"
           ></el-option>
         </el-select>
         <!-- 单选 -->
         <el-radio-group
-          :style="'width:' + item.width"
           v-if="item.type === 'Radio'"
-          v-model="modalData[item.prop]"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
+          v-model="formData[item.prop]"
+          :style="'width:' + item.width"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         >
           <el-radio
-            v-for="ra in item.radios"
+            v-for="ra in item.options"
             :label="ra.value"
             :key="ra.value"
+            :disabled="ra.disabled && ra.disabled(formData[item.prop])"
             >{{ ra.label }}</el-radio
           >
         </el-radio-group>
         <!-- 单选按钮 -->
         <el-radio-group
-          :style="'width:' + item.width"
           v-if="item.type === 'RadioButton'"
-          v-model="modalData[item.prop]"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
+          :style="'width:' + item.width"
+          v-model="formData[item.prop]"
+          v-on="item.event"
+          v-bind="item"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         >
           <el-radio-button
-            v-for="ra in item.radios"
+            v-for="ra in item.options"
             :label="ra.value"
             :key="ra.value"
+            :disabled="ra.disabled && ra.disabled(formData[item.prop])"
             >{{ ra.label }}</el-radio-button
           >
         </el-radio-group>
         <!-- 复选框 -->
         <el-checkbox-group
-          :style="'width:' + item.width"
           v-if="item.type === 'Checkbox'"
-          v-model="modalData[item.prop]"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
+          v-model="formData[item.prop]"
+          :style="'width:' + item.width"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         >
           <el-checkbox
             v-for="ch in item.checkboxs"
             :label="ch.value"
             :key="ch.value"
+            :disabled="ch.disabled && ch.disabled(formData[item.prop])"
             >{{ ch.label }}</el-checkbox
           >
         </el-checkbox-group>
@@ -119,208 +127,128 @@
         <el-cascader
           :style="{ width: item.width }"
           v-if="item.type === 'Cascader'"
-          v-model="modalData[item.prop]"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          :options="item.data"
-          filterable
-          :props="
-            Object.assign(item.props ? item.props : {}, {
-              expandTrigger: 'hover',
-              checkStrictly: false,
-            })
-          "
+          v-model="formData[item.prop]"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         ></el-cascader>
         <!-- 开关 -->
         <el-switch
-          :style="{ width: item.width }"
           v-if="item.type === 'Switch'"
-          v-model="modalData[item.prop]"
-          :active-text="item.activeText || ''"
-          :inactive-text="item.inActiveText || ''"
-          :active-value="item.activeValue ? item.activeValue : true"
-          :inactive-value="item.inActiveValue ? item.inActiveValue : false"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
+          :style="{ width: item.width }"
+          v-model="formData[item.prop]"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         >
         </el-switch>
-        <!-- 日期 -->
+        <!-- 日期选择器 -->
+        <!-- 多种时间选择参数详情看element文档 -->
         <el-date-picker
-          :style="'width:' + item.width"
           v-if="item.type === 'Date'"
-          v-model="modalData[item.prop]"
+          v-model="formData[item.prop]"
+          :style="'width:' + item.width"
+          :type="item.type.toLowerCase()"
           format="yyyy-MM-dd"
           value-format="yyyy-MM-dd"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-        ></el-date-picker>
-        <!-- 日期范围 -->
-        <el-date-picker
-          :style="'width:' + item.width"
-          v-if="item.type === 'DateRange'"
-          type="daterange"
           range-separator="至"
           start-placeholder="开始日期"
           end-placeholder="结束日期"
-          v-model="modalData[item.prop]"
-          format="yyyy-MM-dd"
-          value-format="yyyy-MM-dd"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disable && item.disabled(formData[item.prop])"
         ></el-date-picker>
-        <!-- 时间 -->
+        <!-- 时间选择器 -->
         <el-time-picker
-          :style="'width:' + item.width"
+          v-model="formData[item.prop]"
           v-if="item.type === 'Time'"
-          v-model="modalData[item.prop]"
-          format="HH:mm:ss"
-          value-format="HH:mm:ss"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-        ></el-time-picker>
-        <!-- 时间范围 -->
-        <el-time-picker
           :style="'width:' + item.width"
-          v-if="item.type === 'TimeRange'"
-          v-model="modalData[item.prop]"
-          is-range
-          format="HH:mm:ss"
-          value-format="HH:mm:ss"
           range-separator="至"
           start-placeholder="开始时间"
           end-placeholder="结束时间"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
+          format="HH:mm:ss"
+          value-format="HH:mm:ss"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disable && item.disabled(formData[item.prop])"
         ></el-time-picker>
-        <!-- 日期时间 -->
-        <el-date-picker
-          :style="'width:' + item.width"
-          v-if="item.type === 'DateTime'"
-          type="datetime"
-          v-model="modalData[item.prop]"
-          format="yyyy-MM-dd HH:mm:ss"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          :default-time="item.defaultTime ? item.defaultTime : '00:00:00'"
-          :disabled="item.disable && item.disabled(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-        ></el-date-picker>
-        <!-- 日期时间范围 -->
-        <el-date-picker
-          :style="'width:' + item.width"
-          v-if="item.type === 'DateTimeRange'"
-          type="datetimerange"
-          :picker-options="item.pickerOptions"
-          v-model="modalData[item.prop]"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="yyyy-MM-dd HH:mm:ss"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          :disabled="item.disable && item.disabled(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          :default-time="item.defaultTime"
-        ></el-date-picker>
+        <!-- 时间范围 -->
         <!-- 计数器 -->
         <el-input-number
           v-if="item.type === 'InputNumber'"
-          v-model="modalData[item.prop]"
+          v-model="formData[item.prop]"
           :style="'width:' + item.width"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          :min="item.min"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
         ></el-input-number>
-        <!-- textarea -->
-        <el-input
-          v-if="item.type === 'Textarea'"
-          type="textarea"
-          :autosize="item.rows ? false : true"
-          :style="{ width: item.width }"
-          :rows="item.rows ? item.rows : 2"
-          v-model="modalData[item.prop]"
-          :placeholder="'请输入' + item.label"
-          size="item.size"
-          :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @change="
-            item.change && item.change(modalData[item.prop], item.params)
-          "
-          @input="item.input && item.input(modalData[item.prop])"
-          @focus="item.focus && item.focus(modalData[item.prop])"
-          :label-width="item.labelWidth"
-        ></el-input>
-        <fileUpload
+        <!-- 上传 -->
+        <FileUpload
+          v-if="item.type === 'Upload'"
           :style="'width:' + item.width"
-          v-if="item.type === 'Upload' && modalConfig.show"
-          :file-list="modalData[item.prop]"
-          :listType="item.listType"
-          :isVideo="item.isVideo"
-          :fileUrl.sync="modalData[item.fileUrl]"
-          :fileList.sync="modalData[item.prop]"
-          :accept="item.accept"
-          :tips="item.tips"
-          :limit="item.limit"
-          :readonly="item.readonly"
-          :multiple="item.multiple"
-          :filesize="item.filesize"
-        ></fileUpload>
-
-        <!-- 树 -->
-        <el-tree
-          v-if="item.type === 'Tree'"
-          :data="item.data"
-          show-checkbox
-          :default-expand-all="defaultexpandall"
-          :node-key="item.key"
-          :ref="item.ref"
-          :default-checked-keys="item.checked"
-          highlight-current
-          :props="item.props"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
+        ></FileUpload>
+        <!-- 按钮 -->
+        <el-button
+          v-if="buttonType.indexOf(item.type) != -1"
+          v-bind="item"
+          v-on="item.event"
+          :disabled="item.disabled && item.disabled(formData[item.prop])"
+          @click="item.submit ? globalVerify(item.handle) : item.handle()"
+          >{{ item.label }}</el-button
         >
-        </el-tree>
-        <el-divider v-if="item.divider"></el-divider>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
+import Render from "./render.vue";
+import FileUpload from "./components/fileUpload.vue";
 export default {
+  components: {
+    FileUpload,
+    Render,
+  },
   props: {
-    labelWidth: {
-      type: String,
-      default: "100px",
-    },
-    itemClass: {
-      type: String,
-      default: "form_input",
-    },
     formRef: {
       type: String,
       default: "formRef",
+    },
+    formConfig: {
+      type: Object,
+      default: () => {},
     },
     formData: {
       type: Object,
       default: () => ({}),
     },
-    form: {
+    formCols: {
       type: Array,
       default: () => [],
     },
   },
   data() {
-    return {};
+    return {
+      buttonType: [
+        "primary",
+        "success",
+        "warning",
+        "danger",
+        "info",
+        "text",
+        "Primary",
+        "success",
+        "Warning",
+        "Danger",
+        "Info",
+        "Text",
+      ],
+    };
   },
   methods: {
-    closeModal() {
-      this.$emit("closeModal");
-    },
     // 全局校验
     globalVerify(_fn) {
       this.$refs.formRef.validate((val) => {
