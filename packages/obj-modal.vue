@@ -2,7 +2,7 @@
  * @Author: 陈伟亮 1186723967@qq.com
  * @Date: 2022-07-07 18:22:29
  * @LastEditors: 陈伟亮 1186723967@qq.com
- * @LastEditTime: 2022-07-14 13:56:54
+ * @LastEditTime: 2022-07-21 20:40:45
  * @FilePath: \objectStudio\obj-form\packages\obj-modal.vue
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -18,6 +18,7 @@
         <slot name="dialog__content">
           <slot name="dialog__before"></slot>
           <obj-form
+            ref="objForm"
             :formData="modalData"
             :formCols="modalCols"
             :formConfig="modalConfig"
@@ -33,7 +34,7 @@
           v-bind="item"
           v-on="item.event"
           :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @click="item.submit ? globalVerify(item.handle) : item.handle()"
+          @click="item.submit ? $refs.objForm.globalVerify(item.handle) : item.handle()"
           >{{ item.label }}</el-button
         >
       </span>

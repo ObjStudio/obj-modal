@@ -152,10 +152,10 @@
           <!-- 日期选择器 -->
           <!-- 多种时间选择参数详情看element文档 -->
           <el-date-picker
-            v-if="dateType.indexOf(item.type.toLowerCase())!=-1  "
+            v-if="dateType.indexOf(item.type)!=-1  "
             v-model="formData[item.prop]"
             :style="'width:' + item.width"
-            :type="item.type.toLowerCase()"
+            :type="item.type"
             format="yyyy-MM-dd"
             value-format="yyyy-MM-dd"
             range-separator="至"
@@ -254,7 +254,7 @@ export default {
         "Info",
         "Text",
       ],
-      dateType:['year','month','date','dates',' week','datetime','datetimerange',' daterange','monthrange']
+      dateType:['year','month','date','dates','week','datetime','datetimerange','daterange','monthrange']
     };
   },
   methods: {
@@ -268,13 +268,12 @@ export default {
     },
     //disabled 布尔变量与正常变量适配
     disabled(item){
-      console.log(item)
-      if(typeof item.disabled =='boolean'){
-        return item.disabled
-      }
-      else{
-        return item?.disabled?.()
-      }
+      // if(typeof item.disabled =='boolean'){
+      //   return item.disabled
+      // }
+      // else{
+      //   return item?.disabled?.()
+      // }
     },
     dateProxy(item,val){
       if(!val&&item.type=='datetimerange'){
