@@ -1,11 +1,3 @@
-<!--
- * @Author: 陈伟亮 1186723967@qq.com
- * @Date: 2022-07-07 18:22:29
- * @LastEditors: chenkangxu
- * @LastEditTime: 2022-07-22 20:24:39
- * @FilePath: \objectStudio\obj-form\packages\obj-modal.vue
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
--->
 <template >
   <div>
     <el-dialog
@@ -15,7 +7,7 @@
       v-on="modalEvent"
       :visible.sync="modalConfig.show"
     >
-      <div class="el-dialog-div" :style="{ height }">
+      <div v-loading="loading" :style="{height}">
         <slot name="dialog__content">
           <slot name="dialog__before"></slot>
           <obj-form
@@ -35,11 +27,7 @@
           v-bind="item"
           v-on="item.event"
           :disabled="item.disabled && item.disabled(modalData[item.prop])"
-          @click="
-            item.submit
-              ? $refs.objForm.globalVerify(item.handle)
-              : item.handle()
-          "
+          @click="item.submit ? $refs.objForm.globalVerify(item.handle) : item.handle()"
           >{{ item.label }}</el-button
         >
       </span>
@@ -48,14 +36,21 @@
 </template>
 <script>
 import objForm from "./obj-form.vue";
-import directives from "./js/directives.js";
+import directives from './js/directives'
 export default {
-  directives:directives,
+  directives,
   components: { objForm },
   props: {
     height: {
       type: String,
       default: null,
+    },
+    /**
+     * 是否可推拽
+     */
+    enableDrag: {
+      type: Boolean,
+      default: true,
     },
     modalConfig: {
       type: Object,
@@ -77,14 +72,25 @@ export default {
       type: Array,
       default: () => [],
     },
-    /**
-     * 是否可推拽
-     */
-    enableDrag: {
-      type: Boolean,
-      default: true,
-    },
+    loading:{
+      type:Boolean,
+      default:false
+    }
   },
+  methods:{
+    validate(...args){
+      return this.$refs.objForm.validate(...args)
+    },
+    resetFields(...args){
+      return this.$refs.objForm.resetFields(...args)
+    },
+    clearValidate(...args){
+      return this.$refs.objForm.clearValidate(...args)
+    },
+    validateField(...args){
+      return this.$refs.objForm.validateField(...args)
+    }
+  }
 };
 </script>
 <style >

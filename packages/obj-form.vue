@@ -1,9 +1,9 @@
 <template>
-  <div>
+  <div v-loading="loading">
     <el-form
       :ref="formRef"
       :model="formData"
-      v-bind="formConfig"
+      v-bind="{ formConfig }"
       label-width="100px"
     >
       <template v-for="item in formCols">
@@ -11,7 +11,7 @@
         <render
           v-if="item.type === 'jsx-out'"
           :render="item.render && item.render(formData)"
-          :key="item.prop+item.type"
+          :key="item.prop + item.type"
         ></render>
         <el-form-item
           v-else
@@ -54,7 +54,7 @@
             :placeholder="'请输入' + item.label"
             v-bind="item"
             v-on="item.event"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           ></el-input>
           <!-- 下拉框 -->
           <el-select
@@ -76,7 +76,7 @@
               :label="op.label"
               :value="op.value"
               :key="op.value"
-             :disabled="disabled(op)"
+              :disabled="disabled(op)"
             ></el-option>
           </el-select>
           <!-- 单选 -->
@@ -86,13 +86,13 @@
             :style="'width:' + item.width"
             v-bind="item"
             v-on="item.event"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           >
             <el-radio
               v-for="ra in item.options"
               :label="ra.value"
               :key="ra.value"
-             :disabled="disabled(ra)"
+              :disabled="disabled(ra)"
               >{{ ra.label }}</el-radio
             >
           </el-radio-group>
@@ -103,7 +103,7 @@
             v-model="formData[item.prop]"
             v-on="item.event"
             v-bind="item"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           >
             <el-radio-button
               v-for="ra in item.options"
@@ -146,23 +146,23 @@
             v-model="formData[item.prop]"
             v-bind="item"
             v-on="item.event"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           >
           </el-switch>
           <!-- 日期选择器 -->
           <!-- 多种时间选择参数详情看element文档 -->
           <el-date-picker
-            v-if="dateType.indexOf(item.type)!=-1  "
+            v-if="dateType.indexOf(item.type) != -1"
             v-model="formData[item.prop]"
             :style="'width:' + item.width"
             :type="item.type"
-            format="yyyy-MM-dd"
-            value-format="yyyy-MM-dd"
-            range-separator="至"
-            start-placeholder="开始日期"
-            end-placeholder="结束日期"
+            v-bind="{
+              format: 'yyyy-MM-dd',
+              'value-format': 'yyyy-MM-dd',
+              ...item,
+            }"
             v-on="item.event"
-            @change="(val)=>dateProxy(item,val)"
+            @change="(val) => dateProxy(item, val)"
             :disabled="disabled(item)"
           ></el-date-picker>
           <!-- 时间选择器 -->
@@ -170,14 +170,13 @@
             v-model="formData[item.prop]"
             v-if="item.type === 'Time'"
             :style="'width:' + item.width"
-            range-separator="至"
-            start-placeholder="开始时间"
-            end-placeholder="结束时间"
-            format="HH:mm:ss"
-            value-format="HH:mm:ss"
-            v-bind="item"
+            v-bind="{
+              format: 'yyyy-MM-dd',
+              'value-format': 'yyyy-MM-dd',
+              ...item,
+            }"
             v-on="item.event"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           ></el-time-picker>
           <!-- 时间范围 -->
           <!-- 计数器 -->
@@ -187,7 +186,7 @@
             :style="'width:' + item.width"
             v-bind="item"
             v-on="item.event"
-          :disabled="disabled(item)"
+            :disabled="disabled(item)"
           ></el-input-number>
           <!-- 上传 -->
           <FileUpload
@@ -195,7 +194,7 @@
             :style="'width:' + item.width"
             v-bind="item"
             v-on="item.event"
-           :disabled="disabled(item)"
+            :disabled="disabled(item)"
           ></FileUpload>
           <!-- 按钮 -->
           <el-button
@@ -237,6 +236,10 @@ export default {
       type: Array,
       default: () => [],
     },
+    loading:{
+      type:Boolean,
+      default:false
+    }
   },
   data() {
     return {
@@ -254,7 +257,17 @@ export default {
         "Info",
         "Text",
       ],
-      dateType:['year','month','date','dates','week','datetime','datetimerange','daterange','monthrange']
+      dateType: [
+        "year",
+        "month",
+        "date",
+        "dates",
+        "week",
+        "datetime",
+        "datetimerange",
+        "daterange",
+        "monthrange",
+      ],
     };
   },
   methods: {
@@ -267,22 +280,32 @@ export default {
       });
     },
     //disabled 布尔变量与正常变量适配
-    disabled(item){
-      // if(typeof item.disabled =='boolean'){
-      //   return item.disabled
-      // }
-      // else{
-      //   return item?.disabled?.()
-      // }
+    disabled(item) {
+      if (typeof item.disabled == "boolean") {
+        return item.disabled;
+      } else {
+        return item?.disabled?.();
+      }
     },
-    dateProxy(item,val){
-      if(!val&&item.type=='datetimerange'){
-        this.formData[item.prop]=[]
-        item?.change?.([])
+    dateProxy(item, val) {
+      if (!val && item.type == "datetimerange") {
+        this.formData[item.prop] = [];
+        item?.change?.([]);
+      } else {
+        item?.change?.(val);
       }
-      else{
-        item?.change?.(val)
-      }
+    },
+    validate(...args){
+      return this.$refs[this.formRef].validate(...args)
+    },
+    resetFields(...args){
+      return this.$refs[this.formRef].resetFields(...args)
+    },
+    clearValidate(...args){
+      return this.$refs[this.formRef].clearValidate(...args)
+    },
+    validateField(...args){
+      return this.$refs[this.formRef].validateField(...args)
     }
   },
 };
