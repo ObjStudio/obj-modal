@@ -15,6 +15,7 @@
             :formData="modalData"
             :formCols="modalCols"
             :formConfig="modalConfig"
+            :labelWidth="labelWidth"
           />
           <slot name="dialog__after"></slot>
         </slot>
@@ -75,6 +76,9 @@ export default {
     loading:{
       type:Boolean,
       default:false
+    },
+    labelWidth:{
+      default:"100px"
     }
   },
   methods:{

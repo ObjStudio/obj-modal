@@ -4,7 +4,7 @@
       :ref="formRef"
       :model="formData"
       v-bind="{ formConfig }"
-      label-width="100px"
+      :label-width="labelWidth"
     >
       <template v-for="item in formCols">
         <!-- jsx 返回jsx数据-->
@@ -239,6 +239,9 @@ export default {
     loading:{
       type:Boolean,
       default:false
+    },
+    labelWidth:{
+      default:"100px"
     }
   },
   data() {
