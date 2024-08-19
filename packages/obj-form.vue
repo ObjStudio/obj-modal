@@ -6,7 +6,7 @@
       v-bind="{ formConfig }"
       :label-width="labelWidth"
     >
-      <template v-for="item in formCols">
+      <template v-for="item in _formCols">
         <!-- jsx 返回jsx数据-->
         <render
           v-if="item.type === 'jsx-out'"
@@ -236,13 +236,13 @@ export default {
       type: Array,
       default: () => [],
     },
-    loading:{
-      type:Boolean,
-      default:false
+    loading: {
+      type: Boolean,
+      default: false,
     },
-    labelWidth:{
-      default:"100px"
-    }
+    labelWidth: {
+      default: "100px",
+    },
   },
   data() {
     return {
@@ -273,6 +273,11 @@ export default {
       ],
     };
   },
+  computed: {
+    _formCols() {
+      return this.formCols.filter((item) => item.show != false);
+    },
+  },
   methods: {
     // 全局校验
     globalVerify(_fn) {
@@ -298,18 +303,18 @@ export default {
         item?.change?.(val);
       }
     },
-    validate(...args){
-      return this.$refs[this.formRef].validate(...args)
+    validate(...args) {
+      return this.$refs[this.formRef].validate(...args);
     },
-    resetFields(...args){
-      return this.$refs[this.formRef].resetFields(...args)
+    resetFields(...args) {
+      return this.$refs[this.formRef].resetFields(...args);
     },
-    clearValidate(...args){
-      return this.$refs[this.formRef].clearValidate(...args)
+    clearValidate(...args) {
+      return this.$refs[this.formRef].clearValidate(...args);
     },
-    validateField(...args){
-      return this.$refs[this.formRef].validateField(...args)
-    }
+    validateField(...args) {
+      return this.$refs[this.formRef].validateField(...args);
+    },
   },
 };
 </script>
