@@ -18,7 +18,7 @@
           :key="item.prop"
           :rules="filter_rules(item.label, item.rules)"
           :label="buttonType.indexOf(item.type) != -1 ? null : item.label"
-          v-bind="item"
+          v-bind="{...item,render:null}"
         >
           <!-- jsx 返回jsx数据-->
           <render
