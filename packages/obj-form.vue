@@ -3,7 +3,7 @@
     <el-form
       :ref="formRef"
       :model="formData"
-      v-bind="{ formConfig }"
+      v-bind="formConfig"
       :label-width="labelWidth"
     >
       <template v-for="item in _formCols">
