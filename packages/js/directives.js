@@ -1,6 +1,7 @@
 export default {
     drag: {
         bind(el, binding, vnode, oldVnode) {
+            if(binding.value==false) return;
             const dialogHeaderEl = el.querySelector('.el-dialog__header');
             const dragDom = el.querySelector('.el-dialog');
             //dialogHeaderEl.style.cursor = 'move';
@@ -77,7 +78,7 @@ export default {
             }
         },
         update(el,binding){
-            if(binding===false) return;
+            if(binding.value==false) return;
             const dragDom = el.querySelector(".el-dialog");
             setTimeout(()=>{
                 dragDom.style.top="0";
